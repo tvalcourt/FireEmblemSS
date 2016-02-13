@@ -6,17 +6,14 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import util.IProxyImage;
 import util.ProxyImage;
@@ -59,9 +56,11 @@ public class CharacterController implements Initializable{
         // Add headers into the list with horizontal alignment
         for(int i = 0; i < GRID_COL; i++){
             gridBase.add(headerLabels[i] = new Label(headerText[i]), i, 0);
+            headerLabels[i].setStyle("-fx-font-weight: bold");
             GridPane.setHalignment(headerLabels[i], HPos.CENTER);
 
             gridGrowths.add(headerLabels[i] = new Label(headerText[i]), i, 0);
+            headerLabels[i].setStyle("-fx-font-weight: bold");
             GridPane.setHalignment(headerLabels[i], HPos.CENTER);
         }
 
