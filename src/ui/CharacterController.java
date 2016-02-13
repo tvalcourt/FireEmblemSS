@@ -14,6 +14,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextFlow;
 import javafx.util.Callback;
 import util.IProxyImage;
 import util.ProxyImage;
@@ -31,9 +32,11 @@ public class CharacterController implements Initializable{
     @FXML ImageView imagePortrait; // stores the portrait of the selected character
 
     private final int GRID_COL = 7; // number of rows/cols in growth/base grids
-    @FXML GridPane gridBase, gridGrowths; // growth rate and base stats
+    @FXML GridPane gridBase, gridGrowths, gridSupports; // growth rate and base stats
 
     @FXML ComboBox comboPlayers, comboEnemies; // lists of available characters
+
+    @FXML TextFlow flowGeneral; // general information in the middle of the tab
 
 
     /**
@@ -62,6 +65,16 @@ public class CharacterController implements Initializable{
             gridGrowths.add(headerLabels[i] = new Label(headerText[i]), i, 0);
             headerLabels[i].setStyle("-fx-font-weight: bold");
             GridPane.setHalignment(headerLabels[i], HPos.CENTER);
+        }
+
+        // Headers for Supports
+        Label[] headerSupports = new Label[7];
+        String[] headerSupportsText = {"Char 1", "Char 2", "Char 3", "Char 4", "Char 5", "Char 6", "Char 7"};
+
+        for(int i = 0; i < GRID_COL; i++){
+            gridSupports.add(headerSupports[i] = new Label(headerSupportsText[i]), i, 0);
+            headerSupports[i].setStyle("-fx-font-weight: bold");
+            GridPane.setHalignment(headerSupports[i], HPos.CENTER);
         }
 
         // Populate combo boxes and set rendering to load characters items with their name
