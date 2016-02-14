@@ -138,7 +138,8 @@ public class CharacterController implements Initializable{
             }
         });
 
-        loadStats("Ephraim"); // base stats, growth rate, supports
+        loadStats("Ephraim"); // base stats, growth rate
+        loadSupports("Ephraim");
     }
 
     /**
@@ -172,6 +173,32 @@ public class CharacterController implements Initializable{
                         gridGrowths.add(entries[i] = new Label(growthRate.getString(map[i])), i, 1);
                         GridPane.setHalignment(entries[i], HPos.CENTER);
                     }
+                }
+            }
+
+            stmnt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Loads the specified characters list of supports onto the interface from the database
+     * @param name The name ofthe character to load supports for
+     */
+    public void loadSupports(String name){
+        try {
+            Statement stmnt = db.createStatement();
+            String[] dbColumns = {"option_1", "option_2", "option_3", "option_4", "option_5", "option_6", "option_7"};
+            Label[] entries = new Label[7];
+
+            ResultSet supports = stmnt.executeQuery("SELECT * FROM supports, characters_ss WHERE " +
+                    "characters_ss.id == supports.char_id");
+            while(supports.next()){
+                for(int i = 0; i < GRID_COL; i++){
+                    gridSupports.add(entries[i] = new Label(supports.getString(dbColumns[i])), i, 1);
+                    entries[i].setWrapText(true);
+                    GridPane.setHalignment(entries[i], HPos.RIGHT);
                 }
             }
 
