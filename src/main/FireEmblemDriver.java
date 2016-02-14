@@ -1,26 +1,26 @@
 package main;
 
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
+import ui.FireEmblemUI;
 
-public class FireEmblemDriver extends Application {
+import java.sql.Connection;
+import java.sql.DriverManager;
 
-    @Override
-    public void start(Stage primaryStage) throws Exception{
-        AnchorPane root = FXMLLoader.load(getClass().getResource("/ui/Main.fxml"));
-        Scene scene = new Scene(root);
+public class FireEmblemDriver {
 
-        primaryStage.setTitle("Fire Emblem Guide");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
+    public static Connection dbConnection = null;
 
 
     public static void main(String[] args) {
-        launch(args);
+        // Connect to Local SQL Lite Database
+        try{
+            Class.forName("org.sqlite.JDBC");
+            dbConnection = DriverManager.getConnection("jdbc:sqlite:src/data/FireEmblem.db");
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+
+        // Launch the interface
+        FireEmblemUI.main(args);
     }
 }

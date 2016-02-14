@@ -16,10 +16,15 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextFlow;
 import javafx.util.Callback;
+import main.FireEmblemDriver;
 import util.IProxyImage;
 import util.ProxyImage;
 
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ResourceBundle;
 
 /**
@@ -28,14 +33,13 @@ import java.util.ResourceBundle;
  */
 public class CharacterController implements Initializable{
 
+    private Connection db = FireEmblemDriver.dbConnection;
+
     @FXML Label lblName; // The name of the character
     @FXML ImageView imagePortrait; // stores the portrait of the selected character
-
     private final int GRID_COL = 7; // number of rows/cols in growth/base grids
     @FXML GridPane gridBase, gridGrowths, gridSupports; // growth rate and base stats
-
     @FXML ComboBox comboPlayers, comboEnemies; // lists of available characters
-
     @FXML TextFlow flowGeneral; // general information in the middle of the tab
 
 
@@ -134,5 +138,46 @@ public class CharacterController implements Initializable{
             }
         });
 
+        loadStats("Ephraim"); // base stats, growth rate, supports
+    }
+
+    /**
+     * Loads the base stats and the growth rate of the specified unit from the database
+     * @param name The name of the unit to load data for
+     */
+    public void loadStats(String name){
+        try {
+            Label[] entries = new Label[7];
+            String[] map = {"hp", "strength", "skill", "speed", "luck", "defense", "resistance"};
+            Statement stmnt = db.createStatement();
+
+            /** Base Stats */
+            ResultSet baseStats = stmnt.executeQuery("SELECT * FROM characters_ss, base_stats, growth_rate WHERE " +
+                    "characters_ss.id == base_stats.char_id");
+            while(baseStats.next()){
+                if(baseStats.getString("name").equals(name)) { // if name matches, load that character's data
+                    for (int i = 0; i < GRID_COL; i++) {
+                        gridBase.add(entries[i] = new Label(baseStats.getString(map[i])), i, 1);
+                        GridPane.setHalignment(entries[i], HPos.CENTER);
+                    }
+                }
+            }
+
+            /** Growth Rate */
+            ResultSet growthRate = stmnt.executeQuery("SELECT * FROM characters_ss, growth_rate WHERE " +
+                    "characters_ss.id == growth_rate.char_id");
+            while(growthRate.next()){
+                if(growthRate.getInt("char_id") == baseStats.getInt("char_id")){
+                    for(int i = 0; i < GRID_COL; i++){
+                        gridGrowths.add(entries[i] = new Label(growthRate.getString(map[i])), i, 1);
+                        GridPane.setHalignment(entries[i], HPos.CENTER);
+                    }
+                }
+            }
+
+            stmnt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
