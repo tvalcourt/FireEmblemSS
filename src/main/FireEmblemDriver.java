@@ -5,6 +5,9 @@ import ui.FireEmblemUI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+/**
+ * Driver to setup database connection and launch program
+ */
 public class FireEmblemDriver {
 
     public static Connection dbConnection = null;
