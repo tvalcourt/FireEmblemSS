@@ -40,6 +40,10 @@ public class CharacterController implements Initializable{
     @FXML ComboBox comboPlayers, comboEnemies; // lists of available characters
     @FXML TextFlow flowGeneral; // general information in the middle of the tab
 
+    // The Overhaul
+    @FXML ProgressBar progressHP, progressStr, progressSkill, progressSpeed, progressLuck, progressDefense, progressResistance;
+    @FXML Label lblHPMax, lblStrengthMax, lblSkillMax, lblSpeedMax, lblLuckMax, lblDefenseMax, lblResistanceMax;
+
 
     /**
      * Initialize components of the form to load an initial character
@@ -48,12 +52,7 @@ public class CharacterController implements Initializable{
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Load the image of the default character
-        IProxyImage image = new ProxyImage(ImagePath.PLAYER_PORTRAITS + "portrait_ephraim.png");
-        imagePortrait.setImage(image.getImage(ImagePath.PLAYER_PORTRAITS + "portrait_ephraim.png"));
-
-        lblName.setText("Ephraim");
-
+        /*
         // Create a list of table headers in parallel with a list of strings containing their text
         Label[] headerLabels = new Label[7];
         String[] headerText = {"HP", "Str/Mag", "Skill", "Speed", "Luck", "Def", "Res"};
@@ -78,6 +77,7 @@ public class CharacterController implements Initializable{
             headerSupports[i].setStyle("-fx-font-weight: bold");
             GridPane.setHalignment(headerSupports[i], HPos.CENTER);
         }
+        */
 
         // Populate combo boxes and set rendering to load characters items with their name
         ObservableList players = FXCollections.observableArrayList("Ephraim", "Eirika", "Franz", "Gilliam");
@@ -136,9 +136,50 @@ public class CharacterController implements Initializable{
             }
         });
 
-        loadStats("Ephraim"); // base stats, growth rate
-        loadSupports("Ephraim");
-        loadGeneralInfo("Ephraim");
+        /**
+         * Load data into progress bars
+         */
+        try {
+            Statement stmnt = db.createStatement();
+
+            ResultSet baseStats = stmnt.executeQuery("SELECT * FROM characters, classes, char_base_stats, class_max_stats WHERE characters.start_class == classes.id");
+            while(baseStats.next()){
+                if(baseStats.getString("name").equals("Ephraim")){
+                    // Progress Bars
+                    progressHP.setProgress((double)baseStats.getInt("hp") / baseStats.getInt("max_hp"));
+                    progressStr.setProgress((double)baseStats.getInt("strength") / baseStats.getInt("max_str"));
+                    progressSkill.setProgress((double)baseStats.getInt("skill") / baseStats.getInt("max_skill"));
+                    progressSpeed.setProgress((double)baseStats.getInt("speed") / baseStats.getInt("max_speed"));
+                    progressLuck.setProgress((double)baseStats.getInt("luck") / baseStats.getInt("max_luck"));
+                    progressDefense.setProgress((double)baseStats.getInt("defense") / baseStats.getInt("max_defense"));
+                    progressResistance.setProgress((double)baseStats.getInt("resistance") / baseStats.getInt("max_resistance"));
+
+                    // Maximum Labels
+                    lblHPMax.setText("" + baseStats.getInt("max_hp"));
+                    lblStrengthMax.setText("" + baseStats.getInt("max_str"));
+                    lblSkillMax.setText("" + baseStats.getInt("max_skill"));
+                    lblSpeedMax.setText("" + baseStats.getInt("max_speed"));
+                    lblLuckMax.setText("" + baseStats.getInt("max_luck"));
+                    lblDefenseMax.setText("" + baseStats.getInt("max_defense"));
+                    lblResistanceMax.setText("" + baseStats.getInt("max_resistance"));
+
+                    // Load image
+                    IProxyImage image = new ProxyImage(ImagePath.PLAYER_PORTRAITS + baseStats.getString("portrait_img"));
+                    imagePortrait.setImage(image.getImage(ImagePath.PLAYER_PORTRAITS + baseStats.getString("portrait_img")));
+
+                    // Load Name
+                    lblName.setText(baseStats.getString("name"));
+                }
+            }
+
+            stmnt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // loadStats("Ephraim"); // base stats, growth rate
+        // loadSupports("Ephraim");
+        // loadGeneralInfo("Ephraim");
     }
 
     /**
@@ -152,8 +193,8 @@ public class CharacterController implements Initializable{
             Statement stmnt = db.createStatement();
 
             /** Base Stats */
-            ResultSet baseStats = stmnt.executeQuery("SELECT * FROM characters_ss, base_stats, growth_rate WHERE " +
-                    "characters_ss.id == base_stats.char_id");
+            ResultSet baseStats = stmnt.executeQuery("SELECT * FROM characters, char_base_stats, char_growth_rate WHERE " +
+                    "characters.id == char_base_stats.char_id");
             while(baseStats.next()){
                 if(baseStats.getString("name").equals(name)) { // if name matches, load that character's data
                     for (int i = 0; i < GRID_COL; i++) {
@@ -164,8 +205,8 @@ public class CharacterController implements Initializable{
             }
 
             /** Growth Rate */
-            ResultSet growthRate = stmnt.executeQuery("SELECT * FROM characters_ss, growth_rate WHERE " +
-                    "characters_ss.id == growth_rate.char_id");
+            ResultSet growthRate = stmnt.executeQuery("SELECT * FROM characters, char_growth_rate WHERE " +
+                    "characters.id == char_growth_rate.char_id");
             while(growthRate.next()){
                 if(growthRate.getString("name").equals(name)){
                     for(int i = 0; i < GRID_COL; i++){
@@ -191,8 +232,8 @@ public class CharacterController implements Initializable{
             String[] dbColumns = {"option_1", "option_2", "option_3", "option_4", "option_5", "option_6", "option_7"};
             Label[] entries = new Label[7];
 
-            ResultSet supports = stmnt.executeQuery("SELECT * FROM supports, characters_ss WHERE " +
-                    "characters_ss.id == supports.char_id");
+            ResultSet supports = stmnt.executeQuery("SELECT * FROM supports, characters WHERE " +
+                    "characters.id == supports.char_id");
             while(supports.next()){
                 if(supports.getString("name").equals(name)){
                     for(int i = 0; i < GRID_COL; i++){
@@ -216,8 +257,8 @@ public class CharacterController implements Initializable{
     public void loadGeneralInfo(String name){
         try{
             Statement stmnt = db.createStatement();
-            ResultSet generalInfo = stmnt.executeQuery("SELECT * FROM characters_ss, weapons_start WHERE " +
-                "characters_ss.id == weapons_start.char_id");
+            ResultSet generalInfo = stmnt.executeQuery("SELECT * FROM characters, weapons_start WHERE " +
+                "characters.id == weapons_start.char_id");
 
             while(generalInfo.next()){
                 if(generalInfo.getString("name").equals(name)){
@@ -249,8 +290,8 @@ public class CharacterController implements Initializable{
 
         String characterName = comboPlayers.getValue().toString();
 
-        loadStats(characterName);
-        loadSupports(characterName);
-        loadGeneralInfo(characterName);
+        //loadStats(characterName);
+        //loadSupports(characterName);
+        //loadGeneralInfo(characterName);
     }
 }

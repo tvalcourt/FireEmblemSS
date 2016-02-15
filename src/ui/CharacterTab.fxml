@@ -18,9 +18,9 @@
          </font>
       </Label>
       <Separator layoutX="384.0" orientation="VERTICAL" prefHeight="497.0" prefWidth="7.0" />
-      <Pane prefHeight="497.0" prefWidth="388.0">
+      <Pane layoutY="3.0" prefHeight="497.0" prefWidth="388.0">
          <children>
-            <Label layoutX="12.0" layoutY="121.0" text="Growth Rates">
+            <Label layoutX="202.0" layoutY="27.0" text="Growth Rates">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font></Label>
@@ -28,37 +28,7 @@
                <font>
                   <Font name="System Bold" size="12.0" />
                </font></Label>
-            <GridPane fx:id="gridGrowths" gridLinesVisible="true" layoutX="10.0" layoutY="138.0" prefHeight="47.0" prefWidth="368.0">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-            </GridPane>
-            <GridPane fx:id="gridBase" gridLinesVisible="true" layoutX="10.0" layoutY="44.0" prefHeight="47.0" prefWidth="368.0">
-               <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-               </columnConstraints>
-               <rowConstraints>
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-               </rowConstraints>
-            </GridPane>
-            <GridPane fx:id="gridSupports" gridLinesVisible="true" layoutX="10.0" layoutY="355.0" prefHeight="62.0" prefWidth="368.0">
+            <GridPane fx:id="gridSupports" gridLinesVisible="true" layoutX="10.0" layoutY="365.0" prefHeight="62.0" prefWidth="368.0">
                <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="5.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="5.0" />
@@ -73,16 +43,130 @@
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                </rowConstraints>
             </GridPane>
-            <Label layoutX="12.0" layoutY="338.0" text="Support Information">
+            <Label layoutX="12.0" layoutY="348.0" text="Support Information">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
             </Label>
-            <TextFlow fx:id="flowGeneral" layoutX="10.0" layoutY="195.0" prefHeight="136.0" prefWidth="368.0">
-               <children>
-                  <Label />
-               </children>
-            </TextFlow>
+            <SplitPane dividerPositions="0.5" layoutX="-1.0" layoutY="-3.0" prefHeight="283.0" prefWidth="388.0">
+              <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                     <children>
+                        <TitledPane animated="false" collapsible="false" layoutX="-3.0" layoutY="-4.0" prefHeight="290.0" prefWidth="195.0" text="Base Stats">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="309.0" prefWidth="188.0" />
+                          </content>
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </TitledPane>
+                     </children>
+                  </AnchorPane>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                     <children>
+                        <TitledPane animated="false" collapsible="false" layoutY="-1.0" prefHeight="283.0" prefWidth="197.0" text="Base Stats">
+                           <content>
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="306.0" prefWidth="188.0">
+                                 <children>
+                                    <VBox fillWidth="false" layoutX="35.0" layoutY="11.0" prefHeight="228.0" prefWidth="126.0" spacing="10.0">
+                                       <children>
+                                          <ProgressBar fx:id="progressHP" prefHeight="9.0" prefWidth="126.0" progress="0.0" />
+                                          <ProgressBar fx:id="progressStr" prefWidth="200.0" progress="0.0" />
+                                          <ProgressBar fx:id="progressSkill" prefHeight="20.0" prefWidth="128.0" progress="0.0" />
+                                          <ProgressBar fx:id="progressSpeed" prefWidth="200.0" progress="0.0" />
+                                          <ProgressBar fx:id="progressLuck" prefWidth="200.0" progress="0.0" />
+                                          <ProgressBar fx:id="progressDefense" prefWidth="200.0" progress="0.0" />
+                                          <ProgressBar fx:id="progressResistance" prefWidth="200.0" progress="0.0" />
+                                       </children>
+                                    </VBox>
+                                    <VBox layoutX="3.0" layoutY="10.0" prefHeight="225.0" prefWidth="29.0" spacing="8.0">
+                                       <children>
+                                          <Label text="HP">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                          <Label text="Str">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                          <Label text="Skl">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                          <Label text="Spd">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                          <Label text="Lck">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                          <Label text="Def">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                          <Label text="Res">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </VBox>
+                                    <VBox layoutX="162.0" layoutY="9.0" prefHeight="238.0" prefWidth="31.0" spacing="8.0">
+                                       <children>
+                                          <Label fx:id="lblHPMax">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="lblStrengthMax">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="lblSkillMax">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="lblSpeedMax">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="lblLuckMax">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="lblDefenseMax">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="lblResistanceMax">
+                                             <font>
+                                                <Font name="System Bold Italic" size="16.0" />
+                                             </font>
+                                          </Label>
+                                       </children></VBox>
+                                 </children>
+                              </AnchorPane>
+                           </content>
+                           <font>
+                              <Font name="System Bold" size="15.2" />
+                           </font>
+                        </TitledPane>
+                     </children>
+                  </AnchorPane>
+              </items>
+            </SplitPane>
          </children>
       </Pane>
       <ComboBox fx:id="comboPlayers" layoutX="401.0" layoutY="344.0" prefHeight="25.0" prefWidth="223.0" promptText="Ephraim" />
