@@ -6,14 +6,12 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Callback;
 import main.FireEmblemDriver;
@@ -140,6 +138,7 @@ public class CharacterController implements Initializable{
 
         loadStats("Ephraim"); // base stats, growth rate
         loadSupports("Ephraim");
+        loadGeneralInfo("Ephraim");
     }
 
     /**
@@ -168,7 +167,7 @@ public class CharacterController implements Initializable{
             ResultSet growthRate = stmnt.executeQuery("SELECT * FROM characters_ss, growth_rate WHERE " +
                     "characters_ss.id == growth_rate.char_id");
             while(growthRate.next()){
-                if(growthRate.getInt("char_id") == baseStats.getInt("char_id")){
+                if(growthRate.getString("name").equals(name)){
                     for(int i = 0; i < GRID_COL; i++){
                         gridGrowths.add(entries[i] = new Label(growthRate.getString(map[i])), i, 1);
                         GridPane.setHalignment(entries[i], HPos.CENTER);
@@ -195,10 +194,12 @@ public class CharacterController implements Initializable{
             ResultSet supports = stmnt.executeQuery("SELECT * FROM supports, characters_ss WHERE " +
                     "characters_ss.id == supports.char_id");
             while(supports.next()){
-                for(int i = 0; i < GRID_COL; i++){
-                    gridSupports.add(entries[i] = new Label(supports.getString(dbColumns[i])), i, 1);
-                    entries[i].setWrapText(true);
-                    GridPane.setHalignment(entries[i], HPos.RIGHT);
+                if(supports.getString("name").equals(name)){
+                    for(int i = 0; i < GRID_COL; i++){
+                            gridSupports.add(entries[i] = new Label(supports.getString(dbColumns[i])), i, 1);
+                            entries[i].setWrapText(true);
+                            GridPane.setHalignment(entries[i], HPos.RIGHT);
+                    }
                 }
             }
 
@@ -206,5 +207,50 @@ public class CharacterController implements Initializable{
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Loads starting weapons into the general information text flow
+     * @param name The name of the character to load information for
+     */
+    public void loadGeneralInfo(String name){
+        try{
+            Statement stmnt = db.createStatement();
+            ResultSet generalInfo = stmnt.executeQuery("SELECT * FROM characters_ss, weapons_start WHERE " +
+                "characters_ss.id == weapons_start.char_id");
+
+            while(generalInfo.next()){
+                if(generalInfo.getString("name").equals(name)){
+                    Text weaponRow = new Text();
+                    Text startClass = new Text();
+
+                    // Load all weapons and remove any null strings
+                    weaponRow.setText("Weapon: " + generalInfo.getString("item_1") + "   " + generalInfo.getString("item_2") + "   " +
+                            generalInfo.getString("item_3") + "   " + generalInfo.getString("item_4") + "\n");
+                    weaponRow.setText(weaponRow.getText().replaceAll("null", ""));
+
+                    // Load starting class information
+                    startClass.setText("Starting Class: " + generalInfo.getString("start_class") + "\n");
+
+                    flowGeneral.getChildren().clear();
+                    flowGeneral.getChildren().addAll(weaponRow, startClass);
+                }
+            }
+
+            stmnt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadCharacter(){
+        // Clear all previous entries
+
+
+        String characterName = comboPlayers.getValue().toString();
+
+        loadStats(characterName);
+        loadSupports(characterName);
+        loadGeneralInfo(characterName);
     }
 }
