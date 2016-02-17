@@ -8,6 +8,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
+import javafx.geometry.VPos;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -37,7 +38,7 @@ public class CharacterController implements Initializable{
     @FXML Label lblName; // The name of the character
     @FXML ImageView imagePortrait; // stores the portrait of the selected character
     private final int GRID_COL = 7; // number of rows/cols in growth/base grids
-    @FXML GridPane gridSupports; // growth rate and base stats
+    @FXML GridPane gridSupports,gridHeaders; // support grid (lower) and headers
 
     // The Overhaul
     @FXML ProgressBar progressHP, progressStr, progressSkill, progressSpeed, progressLuck, progressDefense, progressResistance, progressMov, progressCon;
@@ -79,6 +80,17 @@ public class CharacterController implements Initializable{
             }
         });
 
+        /** Load headers for support grid */
+        String header = "Char ";
+        Label[] entries = new Label[7];
+        for(int i = 0; i < 7; i++){
+            entries[i] = new Label(header + (i+1));
+            entries[i].setStyle("-fx-font-weight: bold");
+
+            gridHeaders.add(entries[i], i, 0);
+            GridPane.setHalignment(entries[i], HPos.CENTER);
+        }
+
         /**
          * Load data into progress bars
          */
@@ -101,30 +113,33 @@ public class CharacterController implements Initializable{
 
     /**
      * Loads the specified characters list of supports onto the interface from the database
-     * @param name The name ofthe character to load supports for
+     * @param name The name of the character to load supports for
      */
-    public void loadSupports(String name){
-        try {
-            Statement stmnt = db.createStatement();
-            String[] dbColumns = {"option_1", "option_2", "option_3", "option_4", "option_5", "option_6", "option_7"};
-            Label[] entries = new Label[7];
+    public void loadSupports(String name) throws SQLException{
+        // Clear old entries
+        gridSupports.getChildren().clear();
 
-            ResultSet supports = stmnt.executeQuery("SELECT * FROM supports, characters WHERE " +
-                    "characters.id == supports.char_id");
-            while(supports.next()){
-                if(supports.getString("name").equals(name)){
-                    for(int i = 0; i < GRID_COL; i++){
-                            gridSupports.add(entries[i] = new Label(supports.getString(dbColumns[i])), i, 1);
-                            entries[i].setWrapText(true);
-                            GridPane.setHalignment(entries[i], HPos.RIGHT);
-                    }
+        Statement statement = db.createStatement();
+        String sql = "SELECT name, option_1, option_2, option_3, option_4, option_5, option_6, option_7" +
+                " FROM characters, supports WHERE characters.id == supports.char_id";
+
+        ResultSet supportList = statement.executeQuery(sql);
+        Label[] supports = new Label[7];
+        while(supportList.next()){
+            if(supportList.getString("name").equals(name)){
+                for(int i = 0; i < 7; i++){
+                    supports[i] = new Label(supportList.getString("option_" + (i+1)));
+                    supports[i].setWrapText(true);
+                    gridSupports.add(supports[i], i, 0);
+
+                    GridPane.setValignment(supports[i], VPos.CENTER);
+                    GridPane.setHalignment(supports[i], HPos.CENTER);
                 }
             }
-
-            stmnt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+
+        statement.close();
+        supportList.close();
     }
 
     /**
@@ -216,5 +231,8 @@ public class CharacterController implements Initializable{
 
         stmnt.close();
         charStats.close();
+
+        // Load support data with new query
+        loadSupports(name);
     }
 }
