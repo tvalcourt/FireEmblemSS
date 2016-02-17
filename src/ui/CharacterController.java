@@ -1,6 +1,8 @@
 package ui;
 
 import data.ImagePath;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,22 +11,19 @@ import javafx.geometry.HPos;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import javafx.util.Callback;
 import main.FireEmblemDriver;
+import org.sqlite.SQLiteJDBCLoader;
 import util.IProxyImage;
+import util.ListViewRenderer;
 import util.ProxyImage;
 
+import javax.xml.transform.Result;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
+import java.sql.*;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 /**
@@ -38,15 +37,21 @@ public class CharacterController implements Initializable{
     @FXML Label lblName; // The name of the character
     @FXML ImageView imagePortrait; // stores the portrait of the selected character
     private final int GRID_COL = 7; // number of rows/cols in growth/base grids
-    @FXML GridPane gridBase, gridGrowths, gridSupports; // growth rate and base stats
-    @FXML ComboBox comboPlayers, comboEnemies; // lists of available characters
-    @FXML TextFlow flowGeneral; // general information in the middle of the tab
+    @FXML GridPane gridSupports; // growth rate and base stats
 
     // The Overhaul
     @FXML ProgressBar progressHP, progressStr, progressSkill, progressSpeed, progressLuck, progressDefense, progressResistance, progressMov, progressCon;
     @FXML Label lblHPMax, lblStrengthMax, lblSkillMax, lblSpeedMax, lblLuckMax, lblDefenseMax, lblResistanceMax, lblMovMax, lblConMax;
     @FXML Label lblHP, lblStrength, lblSkill, lblSpeed, lblLuck, lblDefense, lblResistance, lblMov, lblCon;
     @FXML VBox vboxBars;
+
+    HashMap<String, String[]> characterInfo;
+
+    // List of controls for base stats
+    ProgressBar[] baseStatBars;
+    Label[] maxValues, currentValues;
+
+    @FXML ListView listCharacters;
 
 
     /**
@@ -56,60 +61,21 @@ public class CharacterController implements Initializable{
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Populate combo boxes and set rendering to load characters items with their name
-        ObservableList players = FXCollections.observableArrayList("Ephraim", "Eirika", "Franz", "Gilliam");
-        comboPlayers.setItems(players);
-        comboPlayers.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
+        // Setup listview with selection actions and custom cell rendering
+        listCharacters.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
             @Override
             public ListCell<String> call(ListView<String> param) {
-                return new ListCell<String>(){
-
-                    private ImageView imageView = new ImageView();
-                    @Override
-                    protected void updateItem(String name, boolean empty){
-                        super.updateItem(name, empty);
-
-                        if(name == null || empty){
-                            setGraphic(null);
-                        } else {
-                            String formattedName = name.toLowerCase();
-
-                            IProxyImage image = new ProxyImage(ImagePath.PLAYER_ICONS + "icon_" + formattedName + ".png");
-                            imageView.setImage(image.getImage(ImagePath.PLAYER_ICONS + "icon_" + formattedName + ".png"));
-
-                            setText(name);
-                            setGraphic(imageView);
-                        }
-                    }
-                };
+                return new ListViewRenderer();
             }
         });
-
-        ObservableList enemies = FXCollections.observableArrayList("Valter", "Callaech", "Vigarde");
-        comboEnemies.setItems(enemies);
-        comboEnemies.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
+        listCharacters.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
-            public ListCell<String> call(ListView<String> param) {
-                return new ListCell<String>(){
-
-                    private ImageView imageView = new ImageView();
-                    @Override
-                    protected void updateItem(String name, boolean empty){
-                        super.updateItem(name, empty);
-
-                        if(name == null || empty){
-                            setGraphic(null);
-                        } else {
-                            String formattedName = name.toLowerCase();
-
-                            IProxyImage image = new ProxyImage(ImagePath.ENEMY_ICONS + "icon_" + formattedName + ".png");
-                            imageView.setImage(image.getImage(ImagePath.ENEMY_ICONS + "icon_" + formattedName + ".png"));
-
-                            setText(name);
-                            setGraphic(imageView);
-                        }
-                    }
-                };
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                try {
+                    loadCharacter(newValue);
+                } catch (SQLException e){
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -117,62 +83,16 @@ public class CharacterController implements Initializable{
          * Load data into progress bars
          */
         try {
-            Statement stmnt = db.createStatement();
-
-            // Setup style sheets for Progressbars
+            // Setup style sheets for Progress bars
             vboxBars.getStylesheets().add("/ui/stylesheets/progressBarStyles.css");
 
-            ResultSet baseStats = stmnt.executeQuery("SELECT * FROM characters, classes, char_base_stats, class_max_stats WHERE characters.start_class == classes.id AND classes.id == class_max_stats.class_id " +
-                    "AND characters.id == char_base_stats.char_id");
-            ProgressBar[] baseStatBars = {progressHP, progressStr, progressSpeed, progressSkill, progressLuck, progressDefense, progressResistance, progressMov, progressCon};
-            Label[] maxValues = {lblHPMax, lblStrengthMax, lblSpeedMax, lblSkillMax, lblLuckMax, lblDefenseMax, lblResistanceMax, lblMovMax, lblConMax};
-            Label[] currentValues = {lblHP, lblStrength, lblSpeed, lblSkill, lblLuck, lblDefense, lblResistance, lblMov, lblCon};
+            /** Initialize lists of controls for base stats*/
+            baseStatBars = new ProgressBar[]{progressHP, progressStr, progressSpeed, progressSkill, progressLuck, progressDefense, progressResistance, progressMov, progressCon};
+            maxValues = new Label[]{lblHPMax, lblStrengthMax, lblSpeedMax, lblSkillMax, lblLuckMax, lblDefenseMax, lblResistanceMax, lblMovMax, lblConMax};
+            currentValues = new Label[]{lblHP, lblStrength, lblSpeed, lblSkill, lblLuck, lblDefense, lblResistance, lblMov, lblCon};
 
-            while(baseStats.next()){
-                if(baseStats.getString("name").equals("Ephraim")){
-                    for(int i = 0; i < baseStatBars.length; i++){ // load progress bars for base stats
-                        switch(i) {
-                            case 0:
-                                loadBar(baseStatBars[i], maxValues[i], currentValues[i], "hp", "pink", baseStats);
-                                break;
-                            case 1:
-                                loadBar(baseStatBars[i], maxValues[i], currentValues[i],"str", "red", baseStats);
-                                break;
-                            case 2:
-                                loadBar(baseStatBars[i], maxValues[i], currentValues[i],"skill", "cyan", baseStats);
-                                break;
-                            case 3:
-                                loadBar(baseStatBars[i], maxValues[i], currentValues[i],"speed", "yellow", baseStats);
-                                break;
-                            case 4:
-                                loadBar(baseStatBars[i], maxValues[i], currentValues[i],"luck", "grey", baseStats);
-                                break;
-                            case 5:
-                                loadBar(baseStatBars[i], maxValues[i], currentValues[i],"defense", "blue", baseStats);
-                                break;
-                            case 6:
-                                loadBar(baseStatBars[i], maxValues[i], currentValues[i],"resistance", "purple", baseStats);
-                                break;
-                            case 7:
-                                loadBar(baseStatBars[i], maxValues[i], currentValues[i], "mov", "brown", baseStats);
-                                break;
-                            case 8:
-                                loadBar(baseStatBars[i], maxValues[i], currentValues[i], "con", "black", baseStats);
-                                break;
-                        }
-
-                    }
-
-                    // Load image
-                    IProxyImage image = new ProxyImage(ImagePath.PLAYER_PORTRAITS + baseStats.getString("portrait_img"));
-                    imagePortrait.setImage(image.getImage(ImagePath.PLAYER_PORTRAITS + baseStats.getString("portrait_img")));
-
-                    // Load Name
-                    lblName.setText(baseStats.getString("name"));
-                }
-            }
-
-            stmnt.close();
+            /** Load the default character, Ephraim */
+            loadCharacter("Ephraim");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -214,18 +134,87 @@ public class CharacterController implements Initializable{
      * @param base The label corresponding to the actual base value
      * @param stat The stat to load from the database
      * @param color The color to set the bar to
-     * @param query The result set containing the desired character data
+     * @param name The name of the character to load
      */
-    public void loadBar(ProgressBar bar, Label max, Label base, String stat, String color, ResultSet query) throws SQLException{
-
+    public void loadBar(ProgressBar bar, Label max, Label base, String stat, String color, String name, ResultSet charStats) throws SQLException{
         // Loads info from the result set
-        bar.setProgress((double)query.getInt(stat) / query.getInt("max_" + stat));
+        bar.setProgress((double)charStats.getInt(stat) / charStats.getInt("max_" + stat));
         bar.setStyle("-fx-accent: " + color);
 
         // Maximum Labels
-        max.setText("" + query.getInt("max_" + stat));
-        base.setText("" + query.getInt(stat));
+        max.setText("" + charStats.getInt("max_" + stat));
+        base.setText("" + charStats.getInt(stat));
         base.setTextFill(Color.DARKGREY);
     }
 
+    /**
+     * Loads the desired character data into the form using the database to access information
+     * @param name The name of the character to load
+     * @throws SQLException
+     */
+    public void loadCharacter(String name) throws SQLException {
+        Statement stmnt = db.createStatement();
+        String sql = "SELECT * FROM class_max_stats, char_base_stats, characters WHERE characters.id == char_base_stats.char_id " +
+                "AND characters.start_class == class_max_stats.class_id";
+        ResultSet charStats = stmnt.executeQuery(sql);
+        ObservableList names = FXCollections.observableArrayList();
+
+        /**
+         * Iterates through the result set and loads all information onto the form; also secretly populates listview
+         */
+        while (charStats.next()) {
+            names.add(charStats.getString("name" ));
+
+            if (charStats.getString("name").equals(name)) {
+                System.out.println("Matching Character: " + name);
+
+                for (int i = 0; i < baseStatBars.length; i++) { // load progress bars for base stats
+                    switch (i) {
+                        case 0:
+                            loadBar(baseStatBars[i], maxValues[i], currentValues[i], "hp", "pink", name, charStats);
+                            break;
+                        case 1:
+                            loadBar(baseStatBars[i], maxValues[i], currentValues[i], "str", "red", name, charStats);
+                            break;
+                        case 2:
+                            loadBar(baseStatBars[i], maxValues[i], currentValues[i], "skill", "cyan", name, charStats);
+                            break;
+                        case 3:
+                            loadBar(baseStatBars[i], maxValues[i], currentValues[i], "speed", "yellow", name, charStats);
+                            break;
+                        case 4:
+                            loadBar(baseStatBars[i], maxValues[i], currentValues[i], "luck", "grey", name, charStats);
+                            break;
+                        case 5:
+                            loadBar(baseStatBars[i], maxValues[i], currentValues[i], "defense", "blue", name, charStats);
+                            break;
+                        case 6:
+                            loadBar(baseStatBars[i], maxValues[i], currentValues[i], "resistance", "purple", name, charStats);
+                            break;
+                        case 7:
+                            loadBar(baseStatBars[i], maxValues[i], currentValues[i], "mov", "brown", name, charStats);
+                            break;
+                        case 8:
+                            loadBar(baseStatBars[i], maxValues[i], currentValues[i], "con", "black", name, charStats);
+                            break;
+                    }
+                }
+
+
+                IProxyImage image = new ProxyImage(ImagePath.PLAYER_PORTRAITS + charStats.getString("portrait_img"));
+                imagePortrait.setImage(image.getImage(ImagePath.PLAYER_PORTRAITS + charStats.getString("portrait_img")));
+
+                // Load Name
+                lblName.setText(name); // name is always the second value
+            }
+        }
+
+        // Load character names if first iteration
+        if(listCharacters.getItems().isEmpty()){
+            listCharacters.setItems(names);
+        }
+
+        stmnt.close();
+        charStats.close();
+    }
 }

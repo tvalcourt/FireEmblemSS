@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<AnchorPane id="AnchorPane" prefHeight="497.0" prefWidth="637.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.CharacterController">
+<AnchorPane id="AnchorPane" prefHeight="500.0" prefWidth="645.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.CharacterController">
    <children>
       <ImageView fx:id="imagePortrait" fitHeight="300.0" fitWidth="230.0" layoutX="394.0" layoutY="32.0" pickOnBounds="true" preserveRatio="true" />
       <Label fx:id="lblName" alignment="CENTER" contentDisplay="CENTER" layoutX="394.0" layoutY="3.0" prefHeight="32.0" prefWidth="230.0">
@@ -236,14 +236,14 @@
             </SplitPane>
          </children>
       </Pane>
-      <ComboBox fx:id="comboPlayers" layoutX="401.0" layoutY="344.0" prefHeight="25.0" prefWidth="223.0" promptText="Ephraim" />
-      <ComboBox fx:id="comboEnemies" layoutX="401.0" layoutY="395.0" prefHeight="25.0" prefWidth="223.0" />
-      <Label layoutX="401.0" layoutY="324.0" text="Players Units">
+      <ComboBox fx:id="comboPlayers" layoutX="446.0" layoutY="-79.0" prefHeight="25.0" prefWidth="223.0" promptText="Ephraim" />
+      <ComboBox fx:id="comboEnemies" layoutX="446.0" layoutY="-28.0" prefHeight="25.0" prefWidth="223.0" />
+      <Label layoutX="446.0" layoutY="-99.0" text="Players Units">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label layoutX="402.0" layoutY="378.0" text="Enemy Units">
+      <Label layoutX="447.0" layoutY="-45.0" text="Enemy Units">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
@@ -253,5 +253,6 @@
             <Font name="System Bold Italic" size="12.0" />
          </font>
       </Label>
+      <ListView fx:id="listCharacters" layoutX="394.0" layoutY="338.0" prefHeight="96.0" prefWidth="230.0" />
    </children>
 </AnchorPane>
