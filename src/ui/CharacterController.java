@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -23,6 +24,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -41,44 +43,19 @@ public class CharacterController implements Initializable{
     @FXML TextFlow flowGeneral; // general information in the middle of the tab
 
     // The Overhaul
-    @FXML ProgressBar progressHP, progressStr, progressSkill, progressSpeed, progressLuck, progressDefense, progressResistance;
-    @FXML Label lblHPMax, lblStrengthMax, lblSkillMax, lblSpeedMax, lblLuckMax, lblDefenseMax, lblResistanceMax;
+    @FXML ProgressBar progressHP, progressStr, progressSkill, progressSpeed, progressLuck, progressDefense, progressResistance, progressMov, progressCon;
+    @FXML Label lblHPMax, lblStrengthMax, lblSkillMax, lblSpeedMax, lblLuckMax, lblDefenseMax, lblResistanceMax, lblMovMax, lblConMax;
+    @FXML Label lblHP, lblStrength, lblSkill, lblSpeed, lblLuck, lblDefense, lblResistance, lblMov, lblCon;
+    @FXML VBox vboxBars;
 
 
     /**
-     * Initialize components of the form to load an initial character
+     * Initialize components of the form to load an initial character (Ephraim)
      * @param location
      * @param resources
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        /*
-        // Create a list of table headers in parallel with a list of strings containing their text
-        Label[] headerLabels = new Label[7];
-        String[] headerText = {"HP", "Str/Mag", "Skill", "Speed", "Luck", "Def", "Res"};
-
-        // Add headers into the list with horizontal alignment
-        for(int i = 0; i < GRID_COL; i++){
-            gridBase.add(headerLabels[i] = new Label(headerText[i]), i, 0);
-            headerLabels[i].setStyle("-fx-font-weight: bold");
-            GridPane.setHalignment(headerLabels[i], HPos.CENTER);
-
-            gridGrowths.add(headerLabels[i] = new Label(headerText[i]), i, 0);
-            headerLabels[i].setStyle("-fx-font-weight: bold");
-            GridPane.setHalignment(headerLabels[i], HPos.CENTER);
-        }
-
-        // Headers for Supports
-        Label[] headerSupports = new Label[7];
-        String[] headerSupportsText = {"Char 1", "Char 2", "Char 3", "Char 4", "Char 5", "Char 6", "Char 7"};
-
-        for(int i = 0; i < GRID_COL; i++){
-            gridSupports.add(headerSupports[i] = new Label(headerSupportsText[i]), i, 0);
-            headerSupports[i].setStyle("-fx-font-weight: bold");
-            GridPane.setHalignment(headerSupports[i], HPos.CENTER);
-        }
-        */
-
         // Populate combo boxes and set rendering to load characters items with their name
         ObservableList players = FXCollections.observableArrayList("Ephraim", "Eirika", "Franz", "Gilliam");
         comboPlayers.setItems(players);
@@ -142,26 +119,49 @@ public class CharacterController implements Initializable{
         try {
             Statement stmnt = db.createStatement();
 
-            ResultSet baseStats = stmnt.executeQuery("SELECT * FROM characters, classes, char_base_stats, class_max_stats WHERE characters.start_class == classes.id");
+            // Setup style sheets for Progressbars
+            vboxBars.getStylesheets().add("/ui/stylesheets/progressBarStyles.css");
+
+            ResultSet baseStats = stmnt.executeQuery("SELECT * FROM characters, classes, char_base_stats, class_max_stats WHERE characters.start_class == classes.id AND classes.id == class_max_stats.class_id " +
+                    "AND characters.id == char_base_stats.char_id");
+            ProgressBar[] baseStatBars = {progressHP, progressStr, progressSpeed, progressSkill, progressLuck, progressDefense, progressResistance, progressMov, progressCon};
+            Label[] maxValues = {lblHPMax, lblStrengthMax, lblSpeedMax, lblSkillMax, lblLuckMax, lblDefenseMax, lblResistanceMax, lblMovMax, lblConMax};
+            Label[] currentValues = {lblHP, lblStrength, lblSpeed, lblSkill, lblLuck, lblDefense, lblResistance, lblMov, lblCon};
+
             while(baseStats.next()){
                 if(baseStats.getString("name").equals("Ephraim")){
-                    // Progress Bars
-                    progressHP.setProgress((double)baseStats.getInt("hp") / baseStats.getInt("max_hp"));
-                    progressStr.setProgress((double)baseStats.getInt("strength") / baseStats.getInt("max_str"));
-                    progressSkill.setProgress((double)baseStats.getInt("skill") / baseStats.getInt("max_skill"));
-                    progressSpeed.setProgress((double)baseStats.getInt("speed") / baseStats.getInt("max_speed"));
-                    progressLuck.setProgress((double)baseStats.getInt("luck") / baseStats.getInt("max_luck"));
-                    progressDefense.setProgress((double)baseStats.getInt("defense") / baseStats.getInt("max_defense"));
-                    progressResistance.setProgress((double)baseStats.getInt("resistance") / baseStats.getInt("max_resistance"));
+                    for(int i = 0; i < baseStatBars.length; i++){ // load progress bars for base stats
+                        switch(i) {
+                            case 0:
+                                loadBar(baseStatBars[i], maxValues[i], currentValues[i], "hp", "pink", baseStats);
+                                break;
+                            case 1:
+                                loadBar(baseStatBars[i], maxValues[i], currentValues[i],"str", "red", baseStats);
+                                break;
+                            case 2:
+                                loadBar(baseStatBars[i], maxValues[i], currentValues[i],"skill", "cyan", baseStats);
+                                break;
+                            case 3:
+                                loadBar(baseStatBars[i], maxValues[i], currentValues[i],"speed", "yellow", baseStats);
+                                break;
+                            case 4:
+                                loadBar(baseStatBars[i], maxValues[i], currentValues[i],"luck", "grey", baseStats);
+                                break;
+                            case 5:
+                                loadBar(baseStatBars[i], maxValues[i], currentValues[i],"defense", "blue", baseStats);
+                                break;
+                            case 6:
+                                loadBar(baseStatBars[i], maxValues[i], currentValues[i],"resistance", "purple", baseStats);
+                                break;
+                            case 7:
+                                loadBar(baseStatBars[i], maxValues[i], currentValues[i], "mov", "brown", baseStats);
+                                break;
+                            case 8:
+                                loadBar(baseStatBars[i], maxValues[i], currentValues[i], "con", "black", baseStats);
+                                break;
+                        }
 
-                    // Maximum Labels
-                    lblHPMax.setText("" + baseStats.getInt("max_hp"));
-                    lblStrengthMax.setText("" + baseStats.getInt("max_str"));
-                    lblSkillMax.setText("" + baseStats.getInt("max_skill"));
-                    lblSpeedMax.setText("" + baseStats.getInt("max_speed"));
-                    lblLuckMax.setText("" + baseStats.getInt("max_luck"));
-                    lblDefenseMax.setText("" + baseStats.getInt("max_defense"));
-                    lblResistanceMax.setText("" + baseStats.getInt("max_resistance"));
+                    }
 
                     // Load image
                     IProxyImage image = new ProxyImage(ImagePath.PLAYER_PORTRAITS + baseStats.getString("portrait_img"));
@@ -176,51 +176,8 @@ public class CharacterController implements Initializable{
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        // loadStats("Ephraim"); // base stats, growth rate
-        // loadSupports("Ephraim");
-        // loadGeneralInfo("Ephraim");
     }
 
-    /**
-     * Loads the base stats and the growth rate of the specified unit from the database
-     * @param name The name of the unit to load data for
-     */
-    public void loadStats(String name){
-        try {
-            Label[] entries = new Label[7];
-            String[] map = {"hp", "strength", "skill", "speed", "luck", "defense", "resistance"};
-            Statement stmnt = db.createStatement();
-
-            /** Base Stats */
-            ResultSet baseStats = stmnt.executeQuery("SELECT * FROM characters, char_base_stats, char_growth_rate WHERE " +
-                    "characters.id == char_base_stats.char_id");
-            while(baseStats.next()){
-                if(baseStats.getString("name").equals(name)) { // if name matches, load that character's data
-                    for (int i = 0; i < GRID_COL; i++) {
-                        gridBase.add(entries[i] = new Label(baseStats.getString(map[i])), i, 1);
-                        GridPane.setHalignment(entries[i], HPos.CENTER);
-                    }
-                }
-            }
-
-            /** Growth Rate */
-            ResultSet growthRate = stmnt.executeQuery("SELECT * FROM characters, char_growth_rate WHERE " +
-                    "characters.id == char_growth_rate.char_id");
-            while(growthRate.next()){
-                if(growthRate.getString("name").equals(name)){
-                    for(int i = 0; i < GRID_COL; i++){
-                        gridGrowths.add(entries[i] = new Label(growthRate.getString(map[i])), i, 1);
-                        GridPane.setHalignment(entries[i], HPos.CENTER);
-                    }
-                }
-            }
-
-            stmnt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Loads the specified characters list of supports onto the interface from the database
@@ -251,47 +208,24 @@ public class CharacterController implements Initializable{
     }
 
     /**
-     * Loads starting weapons into the general information text flow
-     * @param name The name of the character to load information for
+     * Loads a progress bar value based on current result set
+     * @param bar The bar to load data into
+     * @param max The label corresponding to the maximum the current stat can be
+     * @param base The label corresponding to the actual base value
+     * @param stat The stat to load from the database
+     * @param color The color to set the bar to
+     * @param query The result set containing the desired character data
      */
-    public void loadGeneralInfo(String name){
-        try{
-            Statement stmnt = db.createStatement();
-            ResultSet generalInfo = stmnt.executeQuery("SELECT * FROM characters, weapons_start WHERE " +
-                "characters.id == weapons_start.char_id");
+    public void loadBar(ProgressBar bar, Label max, Label base, String stat, String color, ResultSet query) throws SQLException{
 
-            while(generalInfo.next()){
-                if(generalInfo.getString("name").equals(name)){
-                    Text weaponRow = new Text();
-                    Text startClass = new Text();
+        // Loads info from the result set
+        bar.setProgress((double)query.getInt(stat) / query.getInt("max_" + stat));
+        bar.setStyle("-fx-accent: " + color);
 
-                    // Load all weapons and remove any null strings
-                    weaponRow.setText("Weapon: " + generalInfo.getString("item_1") + "   " + generalInfo.getString("item_2") + "   " +
-                            generalInfo.getString("item_3") + "   " + generalInfo.getString("item_4") + "\n");
-                    weaponRow.setText(weaponRow.getText().replaceAll("null", ""));
-
-                    // Load starting class information
-                    startClass.setText("Starting Class: " + generalInfo.getString("start_class") + "\n");
-
-                    flowGeneral.getChildren().clear();
-                    flowGeneral.getChildren().addAll(weaponRow, startClass);
-                }
-            }
-
-            stmnt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // Maximum Labels
+        max.setText("" + query.getInt("max_" + stat));
+        base.setText("" + query.getInt(stat));
+        base.setTextFill(Color.DARKGREY);
     }
 
-    public void loadCharacter(){
-        // Clear all previous entries
-
-
-        String characterName = comboPlayers.getValue().toString();
-
-        //loadStats(characterName);
-        //loadSupports(characterName);
-        //loadGeneralInfo(characterName);
-    }
 }
