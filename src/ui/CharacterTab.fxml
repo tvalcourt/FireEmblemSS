@@ -29,9 +29,9 @@
                <font>
                   <Font name="System Bold" size="12.0" />
                </font></Label>
-            <Label layoutX="10.0" layoutY="425.0" text="Support Information">
+            <Label layoutX="12.0" layoutY="422.0" text="Support Information">
                <font>
-                  <Font name="System Bold" size="12.0" />
+                  <Font name="System Bold" size="14.0" />
                </font>
             </Label>
             <SplitPane dividerPositions="0.5" layoutX="-1.0" layoutY="-3.0" prefHeight="283.0" prefWidth="388.0">
@@ -247,6 +247,40 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                </rowConstraints>
             </GridPane>
+            <Label layoutX="9.0" layoutY="289.0" text="General Information">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </Label>
+            <Pane layoutX="7.0" layoutY="306.0" prefHeight="116.0" prefWidth="375.0">
+               <children>
+                  <Label layoutX="2.0" layoutY="9.0" text="Inventory">
+                     <font>
+                        <Font name="System Bold Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <VBox layoutX="5.0" layoutY="25.0" prefHeight="92.0" prefWidth="100.0" spacing="7.0">
+                     <children>
+                        <Label fx:id="lblItem1" text="" />
+                        <Label fx:id="lblItem2" text="" />
+                        <Label fx:id="lblItem3" text="" />
+                        <Label fx:id="lblItem4" text="" />
+                     </children>
+                  </VBox>
+                  <Label layoutX="174.0" layoutY="9.0" text="Attributes">
+                     <font>
+                        <Font name="System Bold Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <VBox layoutX="178.0" layoutY="24.0" prefHeight="92.0" prefWidth="195.0" spacing="5.0">
+                     <children>
+                        <Label fx:id="lblClass" text="Start Class: " />
+                        <Label fx:id="lblAffinity" text="Affinity:" />
+                        <Label fx:id="lblRecruitment" text="Recruitment: " />
+                     </children>
+                  </VBox>
+               </children>
+            </Pane>
          </children>
       </Pane>
       <Label fx:id="lblCon" layoutX="278.0" layoutY="253.0" text="temp">

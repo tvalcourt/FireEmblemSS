@@ -16,15 +16,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import main.FireEmblemDriver;
-import org.sqlite.SQLiteJDBCLoader;
 import util.IProxyImage;
 import util.ListViewRenderer;
 import util.ProxyImage;
 
-import javax.xml.transform.Result;
 import java.net.URL;
 import java.sql.*;
-import java.util.HashMap;
 import java.util.ResourceBundle;
 
 /**
@@ -37,7 +34,6 @@ public class CharacterController implements Initializable{
 
     @FXML Label lblName; // The name of the character
     @FXML ImageView imagePortrait; // stores the portrait of the selected character
-    private final int GRID_COL = 7; // number of rows/cols in growth/base grids
     @FXML GridPane gridSupports,gridHeaders; // support grid (lower) and headers
 
     // The Overhaul
@@ -46,13 +42,15 @@ public class CharacterController implements Initializable{
     @FXML Label lblHP, lblStrength, lblSkill, lblSpeed, lblLuck, lblDefense, lblResistance, lblMov, lblCon;
     @FXML VBox vboxBars;
 
-    HashMap<String, String[]> characterInfo;
-
     // List of controls for base stats
     ProgressBar[] baseStatBars;
     Label[] maxValues, currentValues;
 
     @FXML ListView listCharacters;
+    @FXML Label lblItem1, lblItem2, lblItem3, lblItem4;
+    Label[] itemLabels;
+
+    @FXML Label lblClass, lblAffinity, lblRecruitment;
 
 
     /**
@@ -90,6 +88,9 @@ public class CharacterController implements Initializable{
             gridHeaders.add(entries[i], i, 0);
             GridPane.setHalignment(entries[i], HPos.CENTER);
         }
+
+        /** Initialize inventory labels */
+        itemLabels = new Label[]{lblItem1, lblItem2, lblItem3, lblItem4};
 
         /**
          * Load data into progress bars
@@ -140,6 +141,71 @@ public class CharacterController implements Initializable{
 
         statement.close();
         supportList.close();
+    }
+
+    /**
+     * Loads the starting inventory and corresponding item items for a character
+     * @param name The name of the character to load information for
+     */
+    public void loadInventory(String name) throws SQLException{
+        Statement statement = db.createStatement();
+        String sql = "SELECT characters.name, char_weapons_start.item_1,char_weapons_start.item_2,char_weapons_start.item_3,char_weapons_start.item_4 " +
+                "FROM characters, char_weapons_start WHERE characters.id == char_weapons_start.char_id";
+        ResultSet inventory = statement.executeQuery(sql);
+
+        // Get each item from the result set
+        // TODO: Update query to load weapon/item icon images when items have been added
+        String column = "item_";
+        ImageView imageView;
+        IProxyImage image;
+        int index = 1;
+        while(inventory.next()){
+            if(inventory.getString("name").equals(name)) {
+
+                // Load the label information and render item images
+                for(Label item : itemLabels) {
+                    if (item != null && inventory.getString(column + index) != null) {
+                        imageView = new ImageView(); // load a new image control
+
+                        System.out.println(inventory.getString(column + index));
+                        item.setText(inventory.getString(column + index));
+                        image = new ProxyImage(ImagePath.ITEMS + "steel_lance.png");
+                        imageView.setImage(image.getImage(ImagePath.ITEMS + "steel_lance.png"));
+
+                        item.setGraphic(imageView);
+                        index++;
+                    }
+                }
+            }
+        }
+
+        statement.close();
+        inventory.close();
+    }
+
+    public void loadGeneralInfo(String name) throws SQLException{
+        Statement statement = db.createStatement();
+        String sql = "SELECT classes.class_icon, classes.name AS class_name, classes.id, characters.name, characters.start_class, characters.id, characters.affinity, recruitments.* FROM " +
+                     "characters,recruitments,classes WHERE recruitments.char_id = characters.id AND classes.id == characters.start_class";
+        ResultSet general = statement.executeQuery(sql);
+        ImageView classIcon, affinityIcon;
+        IProxyImage classImage, affinityImage;
+
+        // Iterate through the result set
+        while(general.next()){
+            if(general.getString("name").equals(name)){
+
+                lblClass.setText(general.getString("class_name"));
+                classImage = new ProxyImage(ImagePath.CLASSES + general.getString("class_icon"));
+                classIcon = new ImageView(classImage.getImage(ImagePath.CLASSES + general.getString("class_icon")));
+                lblClass.setGraphic(classIcon);
+
+                lblAffinity.setText(general.getString("affinity"));
+
+                lblRecruitment.setText(general.getString("method_early"));
+                lblRecruitment.setWrapText(true);
+            }
+        }
     }
 
     /**
@@ -232,7 +298,9 @@ public class CharacterController implements Initializable{
         stmnt.close();
         charStats.close();
 
-        // Load support data with new query
+        // Load other information
         loadSupports(name);
+        loadInventory(name);
+        loadGeneralInfo(name);
     }
 }

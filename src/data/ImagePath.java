@@ -10,4 +10,11 @@ public class ImagePath {
 
     public static final String PLAYER_ICONS = "src/data/icons_portraits/players/";
     public static final String ENEMY_ICONS = "src/data/icons_portraits/enemies/";
+
+    // items
+    public static final String ITEMS = "src/data/icons_items/";
+
+    // general info
+    public static final String AFFINITY = "src/data/icons_affinity/";
+    public static final String CLASSES = "src/data/icons_classes/";
 }
