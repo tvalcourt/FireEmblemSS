@@ -282,8 +282,8 @@ public class CharacterController implements Initializable{
                 }
 
 
-                IProxyImage image = new ProxyImage(ImagePath.PLAYER_PORTRAITS + charStats.getString("portrait_img"));
-                imagePortrait.setImage(image.getImage(ImagePath.PLAYER_PORTRAITS + charStats.getString("portrait_img")));
+                IProxyImage image = new ProxyImage(ImagePath.CHARACTER_PORTRAITS + charStats.getString("portrait_img"));
+                imagePortrait.setImage(image.getImage(ImagePath.CHARACTER_PORTRAITS + charStats.getString("portrait_img")));
 
                 // Load Name
                 lblName.setText(name); // name is always the second value

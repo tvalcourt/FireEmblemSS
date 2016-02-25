@@ -22,8 +22,8 @@ public class ListViewRenderer extends ListCell<String> {
         } else {
             String formattedName = character.toLowerCase();
 
-            IProxyImage image = new ProxyImage(ImagePath.PLAYER_ICONS + "icon_" + formattedName + ".png");
-            imageView.setImage(image.getImage(ImagePath.PLAYER_ICONS + "icon_" + formattedName + ".png"));
+            IProxyImage image = new ProxyImage(ImagePath.CHARACTER_ICONS + "icon_" + formattedName + ".png");
+            imageView.setImage(image.getImage(ImagePath.CHARACTER_ICONS + "icon_" + formattedName + ".png"));
 
             setText(character);
             setGraphic(imageView);
