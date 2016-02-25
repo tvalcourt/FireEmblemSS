@@ -8,14 +8,13 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <MenuBar prefHeight="25.0" prefWidth="600.0">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="584.0" prefWidth="633.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.MainController">
+     <children>
+      <MenuBar prefHeight="25.0" prefWidth="633.0">
          <menus>
             <Menu mnemonicParsing="false" text="File">
               <items>
-                <MenuItem mnemonicParsing="false" text="Exit" />
+                <MenuItem mnemonicParsing="false" onAction="#closeProgram" text="Exit" />
               </items>
             </Menu>
             <Menu mnemonicParsing="false" text="About">
@@ -26,5 +25,19 @@
             </Menu>
          </menus>
       </MenuBar>
+      <TabPane layoutY="25.0" prefHeight="561.0" prefWidth="633.0" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+            <Tab fx:id="characterTab" onSelectionChanged="#loadTab" text="Characters">
+                <content>
+                    <fx:include fx:id="weapons" source="CharacterTab.fxml" />
+                </content>
+            </Tab>
+          <Tab fx:id="itemTab" onSelectionChanged="#loadTab" text="Items">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
    </children>
 </AnchorPane>
