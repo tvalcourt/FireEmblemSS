@@ -170,6 +170,8 @@ public class CharacterController implements Initializable{
             loadItemIcon(items.get(i), i);
         }
 
+        items.clear(); // clear the list of items
+
         statement.close();
         inventory.close();
     }
@@ -278,6 +280,9 @@ public class CharacterController implements Initializable{
         ResultSet charStats = stmnt.executeQuery(sql);
         ObservableList names = FXCollections.observableArrayList();
 
+        // Clear any old data first
+        clearFields();
+
         /**
          * Iterates through the result set and loads all information onto the form; also secretly populates listview
          */
@@ -340,5 +345,23 @@ public class CharacterController implements Initializable{
         loadSupports(name);
         loadInventory(name);
         loadGeneralInfo(name);
+    }
+
+    /**
+     * Clears information loaded into various data to prevent legacy data from showing when switching characters
+     */
+    public void clearFields(){
+        // Clear inventory labels
+        for(Label item : itemLabels){
+            item.setText("");
+            item.setGraphic(null);
+        }
+
+        // Clear class icon and affinity
+        lblAffinity.setText("");
+        lblAffinity.setGraphic(null);
+
+        lblClass.setText("");
+        lblClass.setGraphic(null);
     }
 }
