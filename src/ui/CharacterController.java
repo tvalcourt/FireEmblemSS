@@ -165,8 +165,6 @@ public class CharacterController implements Initializable{
             }
         }
 
-        System.out.println(items.size());
-
         /** Go through each item in the list and render its icon from the next result set, size of inventory = 4 */
         for(int i = 0; i < 4; i++){
             loadItemIcon(items.get(i), i);
@@ -229,13 +227,19 @@ public class CharacterController implements Initializable{
         while(general.next()){
             if(general.getString("name").equals(name)){
 
+                // Load class + icon
                 lblClass.setText(general.getString("class_name"));
                 classImage = new ProxyImage(ImagePath.CLASSES + general.getString("class_icon"));
                 classIcon = new ImageView(classImage.getImage(ImagePath.CLASSES + general.getString("class_icon")));
                 lblClass.setGraphic(classIcon);
 
+                // Load affinity + icon
                 lblAffinity.setText(general.getString("affinity"));
+                affinityImage = new ProxyImage(ImagePath.AFFINITY + general.getString("affinity").toLowerCase() + ".png");
+                affinityIcon = new ImageView(affinityImage.getImage(ImagePath.AFFINITY + general.getString("affinity").toLowerCase() + ".png"));
+                lblAffinity.setGraphic(affinityIcon);
 
+                // Load recruitment data
                 lblRecruitment.setText(general.getString("method_early"));
                 lblRecruitment.setWrapText(true);
             }
