@@ -22,6 +22,7 @@ import util.ProxyImage;
 
 import java.net.URL;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 /**
@@ -149,38 +150,71 @@ public class CharacterController implements Initializable{
      */
     public void loadInventory(String name) throws SQLException{
         Statement statement = db.createStatement();
-        String sql = "SELECT characters.name, char_weapons_start.item_1,char_weapons_start.item_2,char_weapons_start.item_3,char_weapons_start.item_4 " +
-                "FROM characters, char_weapons_start WHERE characters.id == char_weapons_start.char_id";
+        String sql = "SELECT items.icon_path, items.name, characters.name AS char_name, char_weapons_start.item_1,char_weapons_start.item_2,char_weapons_start.item_3,char_weapons_start.item_4 " +
+                "FROM characters, char_weapons_start, items WHERE characters.id == char_weapons_start.char_id";
         ResultSet inventory = statement.executeQuery(sql);
 
-        // Get each item from the result set
-        // TODO: Update query to load weapon/item icon images when items have been added
-        String column = "item_";
-        ImageView imageView;
-        IProxyImage image;
-        int index = 1;
+        /** Add the names of the items to a list */
+        ArrayList<String> items = new ArrayList<>();
         while(inventory.next()){
-            if(inventory.getString("name").equals(name)) {
-
-                // Load the label information and render item images
-                for(Label item : itemLabels) {
-                    if (item != null && inventory.getString(column + index) != null) {
-                        imageView = new ImageView(); // load a new image control
-
-                        System.out.println(inventory.getString(column + index));
-                        item.setText(inventory.getString(column + index));
-                        image = new ProxyImage(ImagePath.ITEMS + "steel_lance.png");
-                        imageView.setImage(image.getImage(ImagePath.ITEMS + "steel_lance.png"));
-
-                        item.setGraphic(imageView);
-                        index++;
-                    }
-                }
+            if(inventory.getString("char_name").equals(name)){
+                items.add(inventory.getString("item_1"));
+                items.add(inventory.getString("item_2"));
+                items.add(inventory.getString("item_3"));
+                items.add(inventory.getString("item_4"));
             }
+        }
+
+        System.out.println(items.size());
+
+        /** Go through each item in the list and render its icon from the next result set, size of inventory = 4 */
+        for(int i = 0; i < 4; i++){
+            loadItemIcon(items.get(i), i);
         }
 
         statement.close();
         inventory.close();
+    }
+
+    /**
+     * Loads an item/weapon name and its icon onto one of the labels representing the characters starting inventory
+     * @param item The name of the item/weapon
+     * @param index The index to indicate which label to write this information to
+     * @throws SQLException
+     */
+    public void loadItemIcon(String item, int index) throws SQLException{
+        Statement statement = db.createStatement();
+        String sql = "SELECT items.icon_path AS item_icon, items.name AS item_name, weapons.icon_path AS weapon_icon, weapons.name AS weapon_name, char_weapons_start.item_1,char_weapons_start.item_2,char_weapons_start.item_3,char_weapons_start.item_4 " +
+                "FROM char_weapons_start, items, weapons WHERE items.name == char_weapons_start.item_1 OR items.name == char_weapons_start.item_2 OR items.name == char_weapons_start.item_3 OR items.name == char_weapons_start.item_4";
+        ResultSet itemData = statement.executeQuery(sql);
+
+        ImageView labelImage;
+        IProxyImage image;
+        while(itemData.next()){
+            if(itemData.getString("item_name").equals(item)){
+                itemLabels[index].setText(item);
+
+                labelImage = new ImageView();
+                String path = ImagePath.ITEMS + itemData.getString("item_icon");
+                image = new ProxyImage(path);
+                labelImage.setImage(image.getImage(path));
+
+                itemLabels[index].setGraphic(labelImage);
+            }
+            else if(itemData.getString("weapon_name").equals(item)){
+                itemLabels[index].setText(item);
+
+                labelImage = new ImageView();
+                String path = ImagePath.WEAPONS + itemData.getString("weapon_icon");
+                image = new ProxyImage(path);
+                labelImage.setImage(image.getImage(path));
+
+                itemLabels[index].setGraphic(labelImage);
+            }
+        }
+
+        itemData.close();
+        statement.close();
     }
 
     public void loadGeneralInfo(String name) throws SQLException{
