@@ -324,7 +324,6 @@ public class CharacterController implements Initializable{
                     }
                 }
 
-
                 IProxyImage image = new ProxyImage(ImagePath.CHARACTER_PORTRAITS + charStats.getString("portrait_img"));
                 imagePortrait.setImage(image.getImage(ImagePath.CHARACTER_PORTRAITS + charStats.getString("portrait_img")));
 
@@ -358,10 +357,10 @@ public class CharacterController implements Initializable{
         }
 
         // Clear class icon and affinity
-        lblAffinity.setText("");
-        lblAffinity.setGraphic(null);
+        //lblAffinity.setText("");
+        //lblAffinity.setGraphic(null);
 
-        lblClass.setText("");
-        lblClass.setGraphic(null);
+        //lblClass.setText("");
+        //lblClass.setGraphic(null);
     }
 }

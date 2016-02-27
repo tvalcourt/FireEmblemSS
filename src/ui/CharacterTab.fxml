@@ -10,9 +10,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<AnchorPane id="AnchorPane" prefHeight="530.0" prefWidth="669.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.CharacterController">
+<AnchorPane id="AnchorPane" prefHeight="530.0" prefWidth="630.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.CharacterController">
    <children>
-      <ImageView fx:id="imagePortrait" fitHeight="300.0" fitWidth="230.0" layoutX="394.0" layoutY="32.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView fx:id="imagePortrait" fitHeight="300.0" fitWidth="230.0" layoutX="394.0" layoutY="32.0" pickOnBounds="true" />
       <Label fx:id="lblName" alignment="CENTER" contentDisplay="CENTER" layoutX="394.0" layoutY="3.0" prefHeight="32.0" prefWidth="230.0">
          <font>
             <Font name="Lucida Calligraphy Italic" size="20.0" />
